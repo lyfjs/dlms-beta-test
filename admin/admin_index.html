@@ -1,0 +1,1079 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel</title>
+    <link rel="stylesheet" href="../static/style/admin_dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Collapse functionality styles */
+        .sidebar.collapsed {
+            width: 100px;
+            transition: width 0.5s ease;
+        }
+        
+        .sidebar.collapsed .sidebar-title,
+        .sidebar.collapsed .nav-text {
+            display: none;
+            transition: width 0.5s ease;
+
+        }
+        
+        .sidebar.collapsed .nav-icon {
+            font-size: 1.2rem;
+            margin-right: 0;
+            transition: width 0.5s ease;
+
+        }
+        
+        .sidebar.collapsed .nav-link {
+            justify-content: center;
+            padding: 12px 8px;
+            transition: width 0.5s ease;
+
+        }
+        
+        .main-content.expanded {
+            margin-left: 70px;
+            transition: margin-left 0.5s ease;
+            transition: width 0.5s ease;
+
+            
+        }
+        
+        .menu-toggle.active {
+            transform: rotate(-180deg);
+            transition: transform 0.3s ease;
+
+        }
+
+        .menu-toggle {
+            transition: transform 0.3s ease;
+
+        }
+        
+        /* Responsive behavior */
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed !important;
+                left: -280px !important;
+                height: 100vh !important;
+                width: 280px !important;
+                z-index: 1000 !important;
+                transform: none !important;
+            }
+            
+            .sidebar.show {
+                left: 0 !important;
+            }
+            
+            .sidebar.collapsed {
+                left: -280px !important;
+                width: 280px !important;
+            }
+            
+            .main-content {
+                width: 100% !important;
+                margin-left: 0 !important;
+            }
+            
+            .main-content.expanded {
+                margin-left: 0 !important;
+            }
+            
+            .menu-toggle {
+                display: block !important;
+            }
+        }
+        
+        @media (min-width: 769px) {
+            .sidebar {
+                position: relative !important;
+                left: 0 !important;
+                transform: none !important;
+            }
+        }
+
+        /* Content Section Styles */
+        .content-section {
+            display: none;
+        }
+
+        .content-section.visible {
+            display: block;
+        }
+
+        /* Form Styles */
+        .form-card {
+            background: white;
+            padding: 2rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .form-group {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #374151;
+        }
+
+        .form-label i {
+            margin-right: 0.5rem;
+            color: #059669;
+            width: 16px;
+        }
+
+        .form-input, .form-select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            transition: border-color 0.2s;
+        }
+
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: #059669;
+            box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
+        }
+
+        .button-group {
+            margin-top: 2rem;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .submit-btn {
+            background: #059669;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .submit-btn:hover {
+            background: #047857;
+        }
+
+        .submit-btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        .cancel-btn {
+            background: #6b7280;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-left: 1rem;
+        }
+
+        .cancel-btn:hover {
+            background: #4b5563;
+        }
+
+        #coverPreview {
+            max-width: 100px;
+            max-height: 100px;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            padding: 0.25rem;
+        }
+
+        /* Message Styles */
+        .success-message {
+            color: #059669;
+            background: #d1fae5;
+            padding: 0.75rem;
+            border-radius: 6px;
+            border: 1px solid #a7f3d0;
+            margin-bottom: 1rem;
+        }
+
+        .error-message {
+            color: #dc2626;
+            background: #fee2e2;
+            padding: 0.75rem;
+            border-radius: 6px;
+            border: 1px solid #fecaca;
+            margin-bottom: 1rem;
+        }
+
+        /* Search and Filter Controls */
+        .search-controls {
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: #f8fafc;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .search-row {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .search-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .search-input, .search-select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            transition: border-color 0.2s;
+        }
+
+        .search-input:focus, .search-select:focus {
+            outline: none;
+            border-color: #059669;
+            box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
+        }
+
+        /* Books Table */
+        .books-table-container {
+            overflow-x: auto;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .books-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        .books-table th,
+        .books-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .books-table th {
+            background: #f8fafc;
+            font-weight: 600;
+            color: #374151;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .books-table tr:hover {
+            background: #f9fafb;
+        }
+
+        .book-cover-thumb {
+            width: 60px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 4px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .no-cover {
+            width: 60px;
+            height: 80px;
+            background: #f3f4f6;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #9ca3af;
+            font-size: 0.75rem;
+        }
+
+        .action-btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin: 0.25rem;
+        }
+
+        .edit-btn {
+            background: #059669;
+            color: white;
+        }
+
+        .edit-btn:hover {
+            background: #047857;
+        }
+
+        .delete-btn {
+            background: #dc2626;
+            color: white;
+        }
+
+        .delete-btn:hover {
+            background: #b91c1c;
+        }
+
+        .loading-indicator {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem;
+            color: #6b7280;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(5, 150, 105, 0.1);
+            border-radius: 50%;
+            border-top-color: #059669;
+            animation: spin 1s ease-in-out infinite;
+            margin-bottom: 1rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .no-books-message {
+            text-align: center;
+            padding: 3rem;
+            color: #6b7280;
+            font-size: 1.125rem;
+        }
+
+        /* Modal styles */
+        .modal {
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            overflow-y: auto;
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 0;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            color: #1e293b;
+        }
+
+        .close {
+            color: #6b7280;
+            font-size: 2rem;
+            font-weight: bold;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .close:hover {
+            color: #374151;
+        }
+
+        .modal-body {
+            padding: 2rem;
+        }
+
+        /* Responsive design for new components */
+        @media (max-width: 768px) {
+            .search-row {
+                flex-direction: column;
+            }
+            
+            .search-group {
+                min-width: auto;
+            }
+            
+            .books-table {
+                font-size: 0.875rem;
+            }
+            
+            .books-table th,
+            .books-table td {
+                padding: 0.75rem 0.5rem;
+            }
+            
+            .action-btn {
+                padding: 0.375rem 0.75rem;
+                font-size: 0.75rem;
+            }
+            
+            .modal-content {
+                width: 95%;
+                margin: 2% auto;
+            }
+            
+            .modal-body {
+                padding: 1rem;
+            }
+            
+            .form-row {
+                flex-direction: column;
+            }
+            
+            .form-group {
+                min-width: auto;
+            }
+            
+            .button-group {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .cancel-btn {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div style="align-content: center; text-align: center;">
+                    <img src="../static/img/logo.png" id="logoside" alt="logo">
+                    <div class="sidebar-title">School Admin</div>
+                </div>
+            </div>
+            <nav class="nav-menu">
+                <div class="nav-item">
+                    <a href="#" class="nav-link active" id="dashboardLink" data-content="dashboard">
+                        <span class="nav-icon">📊</span>
+                        <span class="nav-text">Dashboard</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="#" class="nav-link" data-content="users">
+                        <span class="nav-icon">👥</span>
+                        <span class="nav-text">Users</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="#" class="nav-link" id="addBooksLink" data-content="add-books">
+                        <span class="nav-icon">📚</span>
+                        <span class="nav-text">Add Books</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="#" class="nav-link" data-content="book-list">
+                        <span class="nav-icon">📋</span>
+                        <span class="nav-text">Book List</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="#" class="nav-link" data-content="requests">
+                        <span class="nav-icon">📄</span>
+                        <span class="nav-text">Requests</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="#" class="nav-link" data-content="history">
+                        <span class="nav-icon">📖</span>
+                        <span class="nav-text">History</span>
+                    </a>
+                </div>
+                <div class="nav-item" style="margin-top: auto;">
+                    <a href="#" class="nav-link" id="logoutBtn" style="color: #dc2626;">
+                        <span class="nav-icon">🚪</span>
+                        <span class="nav-text">Logout</span>
+                    </a>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Top Bar -->
+            <header class="topbar">
+                <button class="menu-toggle" id="menuToggle">☰</button>
+                <div class="topbar-right">
+                    <!-- Add any additional topbar content here -->
+                </div>
+            </header>
+
+            <div class="content">
+                <!-- Dashboard Content -->
+                <div class="dashboard-content visible" id="dashboardContent">
+                    <div class="page-header">
+                        <h1 class="page-title">Dashboard</h1>
+                        <p class="page-subtitle">Welcome to the School Admin Dashboard</p>
+                    </div>
+                    
+                    <!-- Dashboard content can be expanded here -->
+                    <div class="dashboard-cards">
+                        <div style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                            <h3 style="color: #1e293b; margin-bottom: 1rem;">Quick Actions</h3>
+                            <p style="color: #64748b;">Use the navigation menu to manage books, users, and view reports.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Add Books Content -->
+                <div class="content-section" id="addBooksContent" style="display: none;">
+                    <div class="page-header">
+                        <h1 class="page-title">Add Books</h1>
+                        <p class="page-subtitle">Add new books to the library catalog</p>
+                    </div>
+                    
+                    <div class="form-card">
+                        <form id="addBookForm" enctype="multipart/form-data">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label" for="title">
+                                        <i class="fas fa-heading"></i>
+                                        Book Title
+                                    </label>
+                                    <input class="form-input" name="title" id="title" type="text" placeholder="Enter the book title" required>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label" for="bookType">
+                                        <i class="fas fa-tag"></i>
+                                        Book Type
+                                    </label>
+                                    <select id="bookType" name="bookType" class="form-select" required onchange="toggleFields(this)">
+                                        <option value="" disabled>Select book type</option>
+                                        <option value="Module" selected>Module</option>
+                                        <option value="Novel">Novel</option>
+                                    </select>
+                                </div>
+                                <div class="form-group" id="genreGroup" style="display:none">
+                                    <label class="form-label" for="genre">
+                                        <i class="fas fa-theater-masks"></i>
+                                        Genre
+                                    </label>
+                                    <select id="genre" name="genre" class="form-select">
+                                        <option value="" disabled selected>Select genre</option>
+                                        <option value="Fantasy">Fantasy</option>
+                                        <option value="Science Fiction">Science Fiction</option>
+                                        <option value="Mystery">Mystery</option>
+                                        <option value="Thriller">Thriller</option>
+                                        <option value="Romance">Romance</option>
+                                        <option value="Historical">Historical</option>
+                                        <option value="Young Adult">Young Adult</option>
+                                        <option value="Horror">Horror</option>
+                                    </select>
+                                </div>
+                                <div class="form-group" id="levelGroup">
+                                    <label class="form-label" for="level">
+                                        <i class="fas fa-graduation-cap"></i>
+                                        Grade Level
+                                    </label>
+                                    <select class="form-select" name="level" id="level">
+                                        <option value="" disabled selected>Select grade level</option>
+                                        <option value="11">Grade 11</option>
+                                        <option value="12">Grade 12</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group" id="strandGroup">
+                                    <label for="strand" class="form-label">
+                                        <i class="fas fa-project-diagram"></i>
+                                        Strand
+                                    </label>
+                                    <select id="strand" name="strand" class="form-select">
+                                        <option value="" disabled selected>Select strand</option>
+                                        <option value="STEM">STEM</option>
+                                        <option value="ABM">ABM</option>
+                                        <option value="HUMSS">HUMSS</option>
+                                        <option value="GAS">GAS</option>
+                                        <option value="tvl-cookery">TVL Cookery</option>
+                                        <option value="tvl-ict-cp">TVL ICT Computer Programming</option>
+                                        <option value="tvl-ict-css">TVL ICT Computer Servicing</option>
+                                    </select>
+                                </div>
+                                <div class="form-group" id="qtrGroup">
+                                    <label for="qtr" class="form-label">
+                                        <i class="fas fa-calendar-alt"></i>
+                                        Quarter
+                                    </label>
+                                    <select id="qtr" name="qtr" class="form-select">
+                                        <option value="" disabled selected>Select quarter</option>
+                                        <option value="qtr1">Quarter 1</option>
+                                        <option value="qtr2">Quarter 2</option>
+                                        <option value="qtr3">Quarter 3</option>
+                                        <option value="qtr4">Quarter 4</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="quantity">
+                                        <i class="fas fa-sort-numeric-up"></i>
+                                        Quantity
+                                    </label>
+                                    <input class="form-input" name="quantity" id="quantity" type="number" placeholder="Enter quantity" min="1" required>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group author-group">
+                                    <label class="form-label" for="author">
+                                        <i class="fas fa-user"></i>
+                                        Author
+                                    </label>
+                                    <input class="form-input" name="author" id="author" type="text" placeholder="Enter author name">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="publisher">
+                                        <i class="fas fa-building"></i>
+                                        Publisher
+                                    </label>
+                                    <input class="form-input" name="publisher" id="publisher" type="text" placeholder="Enter publisher name" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="description">
+                                        <i class="fas fa-align-left"></i>
+                                        Description
+                                    </label>
+                                    <input class="form-input" name="description" id="description" type="text" placeholder="Enter book description" required>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label" for="cover">
+                                        <i class="fas fa-image"></i>
+                                        Cover Image
+                                    </label>
+                                    <input class="form-input" name="cover" id="cover" type="file" accept="image/*">
+                                </div>
+                                
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="form-label" for="file_path">
+                                            <i class="fas fa-file"></i> Upload file
+                                        </label>
+                                        <input class="form-input" name="file_path" id="file_path" type="file" accept="">
+                                    </div>
+                                
+                                    <div class="form-group">
+                                        <label class="form-label" for="link">
+                                            <i class="fas fa-link"></i> Raw PDF Link
+                                        </label>
+                                        <input class="form-input" name="link" id="link" type="url" placeholder="www.example.com/title.pdf">
+                                    </div>
+                                </div>
+                                
+
+
+                                
+                                <div class="form-group">
+                                    <label class="form-label">
+                                        <i class="fas fa-eye"></i>
+                                        Preview
+                                    </label>
+                                    <img id="coverPreview" alt="No image selected" />
+                                </div>
+                            </div>
+
+                            <div class="button-group">
+                                <button type="submit" class="submit-btn" id="submitBtn">
+                                    <i class="fas fa-save"></i>
+                                    Submit Book
+                                </button>
+                            </div>
+                        </form>
+                        
+                        <!-- Add message display area -->
+                        <div id="messageArea" style="margin-top: 1rem; display: none;">
+                            <div id="successMessage" class="success-message" style="display: none;"></div>
+                            <div id="errorMessage" class="error-message" style="display: none;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Book List Content -->
+                <div class="content-section" id="bookListContent" style="display: none;">
+                    <div class="page-header">
+                        <h1 class="page-title">Book List</h1>
+                        <p class="page-subtitle">Manage and edit all books in the catalog system</p>
+                    </div>
+
+                    <div class="form-card">
+                        <!-- Search and Filter Controls -->
+                        <div class="search-controls">
+                            <div class="search-row">
+                                <div class="search-group">
+                                    <input type="text" id="searchInput" placeholder="Search books by title, description, or publisher..." class="search-input">
+                                </div>
+                                <div class="search-group">
+                                    <select id="filterBookType" class="search-select">
+                                        <option value="">All Book Types</option>
+                                        <option value="Module">Module</option>
+                                        <option value="Novel">Novel</option>
+                                    </select>
+                                </div>
+                                <div class="search-group">
+                                    <select id="filterStrand" class="search-select">
+                                        <option value="">All Strands</option>
+                                        <option value="STEM">STEM</option>
+                                        <option value="ABM">ABM</option>
+                                        <option value="HUMSS">HUMSS</option>
+                                        <option value="GAS">GAS</option>
+                                        <option value="tvl-cookery">TVL Cookery</option>
+                                        <option value="tvl-ict-cp">TVL ICT CP</option>
+                                        <option value="tvl-ict-css">TVL ICT CSS</option>
+                                    </select>
+                                </div>
+                                <div class="search-group">
+                                    <select id="filterLevel" class="search-select">
+                                        <option value="">All Grade Levels</option>
+                                        <option value="11">Grade 11</option>
+                                        <option value="12">Grade 12</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Books Table -->
+                        <div class="books-table-container">
+                            <table class="books-table" id="booksTable">
+                                <thead>
+                                    <tr>
+                                        <th>Cover</th>
+                                        <th>Title</th>
+                                        <th>Type</th>
+                                        <th>Level</th>
+                                        <th>Strand</th>
+                                        <th>Quarter</th>
+                                        <th>Genre</th>
+                                        <th>Quantity</th>
+                                        <th>Publisher</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="booksTableBody">
+                                    <!-- Books will be loaded here dynamically -->
+                                </tbody>
+                            </table>
+                            
+                            <!-- Loading indicator -->
+                            <div id="loadingIndicator" class="loading-indicator">
+                                <div class="spinner"></div>
+                                <p>Loading books...</p>
+                            </div>
+                            
+                            <!-- No books message -->
+                            <div id="noBooksMessage" class="no-books-message" style="display: none;">
+                                <p>No books found matching your criteria.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Users Content -->
+                <div class="content-section" id="usersContent" style="display: none;">
+                    <div class="page-header">
+                        <h1 class="page-title">Users</h1>
+                        <p class="page-subtitle">Manage user accounts</p>
+                    </div>
+                    <!-- Users Content -->
+                <div class="content-section" id="usersContent" style="display: none;">
+                    <div class="page-header">
+                        <h1 class="page-title">Users</h1>
+                        <p class="page-subtitle">Manage student accounts (Superadmin Only)</p>
+                    </div>
+
+                    <div class="form-card">
+                        <!-- Search and Filter Controls -->
+                        <div class="search-controls">
+                            <div class="search-row">
+                                <div class="search-group">
+                                    <input type="text" id="userSearchInput" placeholder="Search users by name or email..." class="search-input">
+                                </div>
+                                <div class="search-group">
+                                    <select id="filterGradeLevel" class="search-select">
+                                        <option value="">All Grade Levels</option>
+                                        <option value="11">Grade 11</option>
+                                        <option value="12">Grade 12</option>
+                                    </select>
+                                </div>
+                                <div class="search-group">
+                                    <select id="filterSection" class="search-select">
+                                        <option value="">All Sections</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Users Table -->
+                        <div class="books-table-container">
+                            <table class="books-table" id="usersTable">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Grade Level</th>
+                                        <th>Section</th>
+                                        <th>Phone</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="usersTableBody">
+                                    <!-- Users will be loaded here dynamically -->
+                                </tbody>
+                            </table>
+                            
+                            <!-- Loading indicator -->
+                            <div id="usersLoadingIndicator" class="loading-indicator">
+                                <div class="spinner"></div>
+                                <p>Loading users...</p>
+                            </div>
+                            
+                            <!-- No users message -->
+                            <div id="noUsersMessage" class="no-books-message" style="display: none;">
+                                <p>No users found matching your criteria.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                </div>
+
+                <!-- Requests Content -->
+                <div class="content-section" id="requestsContent" style="display: none;">
+                    <div class="page-header">
+                        <h1 class="page-title">Requests</h1>
+                        <p class="page-subtitle">Manage book requests</p>
+                    </div>
+                    <div class="form-card">
+                        <p>Requests management coming soon...</p>
+                    </div>
+                </div>
+
+                <!-- History Content -->
+                <div class="content-section" id="historyContent" style="display: none;">
+                    <div class="page-header">
+                        <h1 class="page-title">History</h1>
+                        <p class="page-subtitle">View transaction history</p>
+                    </div>
+                    <div class="form-card">
+                        <p>History view coming soon...</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Edit Book Modal -->
+    <div id="editModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit Book</h2>
+                <span class="close" id="closeModal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="editBookForm" method="POST" enctype="multipart/form-data">
+                    <input type="hidden" id="editBookId" name="book_id">
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="editTitle">Book Title</label>
+                            <input class="form-input" name="title" id="editTitle" type="text" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="editBookType">Book Type</label>
+                            <select id="editBookType" name="bookType" class="form-select" required onchange="toggleEditFields(this)">
+                                <option value="Module">Module</option>
+                                <option value="Novel">Novel</option>
+                            </select>
+                        </div>
+                        <div class="form-group" id="editGenreGroup" style="display:none">
+                            <label class="form-label" for="editGenre">Genre</label>
+                            <select id="editGenre" name="genre" class="form-select">
+                                <option value="">Select genre</option>
+                                <option value="Fantasy">Fantasy</option>
+                                <option value="Science Fiction">Science Fiction</option>
+                                <option value="Mystery">Mystery</option>
+                                <option value="Thriller">Thriller</option>
+                                <option value="Romance">Romance</option>
+                                <option value="Historical">Historical</option>
+                                <option value="Young Adult">Young Adult</option>
+                                <option value="Horror">Horror</option>
+                            </select>
+                        </div>
+                        <div class="form-group" id="editLevelGroup">
+                            <label class="form-label" for="editLevel">Grade Level</label>
+                            <select class="form-select" name="level" id="editLevel">
+                                <option value="">Select grade level</option>
+                                <option value="11">Grade 11</option>
+                                <option value="12">Grade 12</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group" id="editStrandGroup">
+                            <label for="editStrand" class="form-label">Strand</label>
+                            <select id="editStrand" name="strand" class="form-select">
+                                <option value="">Select strand</option>
+                                <option value="STEM">STEM</option>
+                                <option value="ABM">ABM</option>
+                                <option value="HUMSS">HUMSS</option>
+                                <option value="GAS">GAS</option>
+                                <option value="tvl-cookery">TVL Cookery</option>
+                                <option value="tvl-ict-cp">TVL ICT CP</option>
+                                <option value="tvl-ict-css">TVL ICT CSS</option>
+                            </select>
+                        </div>
+                        <div class="form-group" id="editQtrGroup">
+                            <label for="editQtr" class="form-label">Quarter</label>
+                            <select id="editQtr" name="qtr" class="form-select">
+                                <option value="">Select quarter</option>
+                                <option value="qtr1">Quarter 1</option>
+                                <option value="qtr2">Quarter 2</option>
+                                <option value="qtr3">Quarter 3</option>
+                                <option value="qtr4">Quarter 4</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="editQuantity">Quantity</label>
+                            <input class="form-input" name="quantity" id="editQuantity" type="number" min="1" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="editPublisher">Publisher</label>
+                            <input class="form-input" name="publisher" id="editPublisher" type="text" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="editDescription">Description</label>
+                            <input class="form-input" name="description" id="editDescription" type="text" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="editAuthor">Author</label>
+                            <input class="form-input" name="author" id="editAuthor" type="text">
+
+                        </div>
+                    </div>
+
+
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="editFilePath">
+                                <i class="fas fa-file"></i>
+                                Upload file
+                            </label>
+                            <input class="form-input" name="file_path" id="editFilePath" type="file" accept="">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="editCurrentFile">
+                                <i class="fas fa-file"></i>
+                                Current File
+                            </label>
+                            <div id="editCurrentFile" style="padding: 0.5rem; background: #f3f4f6; border-radius: 4px;">
+                                <span id="currentFileName">No file uploaded</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="editLink">
+                                <i class="fas fa-link"></i>
+                                Raw PDF Link
+                            </label>
+                            <input class="form-input" name="link" id="editLink" type="url" placeholder="www.example.com/title.pdf">
+                        </div>
+                    </div>
+
+
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="editCover">Cover Image</label>
+                            <input class="form-input" name="cover" id="editCover" type="file" accept="image/*">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Current Cover</label>
+                            <img id="editCurrentCover" alt="Current cover" style="max-width: 100px; max-height: 100px;">
+                        </div>
+                    </div>
+
+                    <div class="button-group">
+                        <button type="submit" class="submit-btn">
+                            <i class="fas fa-save"></i>
+                            Update Book
+                        </button>
+                        <button type="button" class="cancel-btn" onclick="closeEditModal()">
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+<script src="js/admin_edit_users.js"></script>
+<script src="js/admin_edit_books.js"></script>
+<script src="js/admin_book_request.js"></script>
+<script src="../config.js"></script>
+<script src="js/admin_index.js">
+
+    </script>
+</body>
+</html>

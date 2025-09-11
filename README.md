@@ -1,2 +1,2 @@
-# dlms-beta-test
-Only for beta test server
+# DLMS
+Production deployment

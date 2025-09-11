@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://unpkg.com/tailwindcss@0.3.0/dist/tailwind.min.css" rel="stylesheet">
+    <title>Admin Login - LYFJSHS Library System</title>
+    <meta name="robots" content="noindex" />
+    <style>
+        body { background: #edf2f7; }
+        .error-message { color: #e53e3e; font-size: 0.875rem; margin-top: 0.5rem; }
+        .success-message { color: #38a169; font-size: 0.875rem; margin-top: 0.5rem; }
+        .admin-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .admin-logo {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 1rem;
+        }
+        .admin-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #2d3748;
+            margin-bottom: 0.5rem;
+        }
+        .admin-subtitle {
+            color: #718096;
+            font-size: 0.875rem;
+        }
+        .back-link {
+            text-align: center;
+            margin-top: 1rem;
+        }
+        .back-link a {
+            color: #4a5568;
+            text-decoration: none;
+            font-size: 0.875rem;
+        }
+        .back-link a:hover {
+            color: #2d3748;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body class="h-screen overflow-hidden flex items-center justify-center">
+    <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4 flex flex-col w-96">
+        <div class="admin-header">
+            <img src="../static/img/logo.png" alt="LYFJSHS Logo" class="admin-logo">
+            <div class="admin-title">Admin Login</div>
+            <div class="admin-subtitle">LYFJSHS Library System</div>
+        </div>
+        
+        <form id="loginForm">
+            <div class="mb-4">
+                <label class="block text-grey-darker text-sm font-bold mb-2" for="username">
+                    Username
+                </label>
+                <input class="shadow appearance-none border rounded w-full py-2 px-3 text-grey-darker" name="username" id="username" type="text" placeholder="Username" required>
+            </div>
+            <div class="mb-6">
+                <label class="block text-glock text-grey-darker text-sm font-bold mb-2" for="password">
+                    Password
+                </label>
+                <input class="shadow appearance-none border rounded w-full py-2 px-3 text-grey-darker mb-3" name="password" id="password" type="password" placeholder="******************" required>
+                <p class="text-red text-xs italic"></p>
+            </div>
+            <div class="mb-4">
+                <div id="errorMessage" class="error-message" style="display: none;"></div>
+                <div id="successMessage" class="success-message" style="display: none;"></div>
+            </div>
+            <div class="flex items-center justify-between">
+                <button class="bg-blue hover:bg-blue-dark text-white font-bold py-2 px-4 rounded" type="submit" id="loginBtn">
+                    Sign In
+                </button>
+            </div>
+        </form>
+        
+        <div class="back-link">
+            <a href="../index.html">← Back to Home</a>
+        </div>
+    </div>
+    
+    <script src="../config.js"></script>
+    <script src="js/admin_login.js">
+
+    </script>
+</body>
+</html>

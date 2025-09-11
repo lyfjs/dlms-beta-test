@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Catalog - LYFJSHS Library</title>
+    <link rel="stylesheet" href="static/style/index.css">
+    <link rel="stylesheet" href="static/style/books.css">
+    <link rel="stylesheet" href="static/style/view_books.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar__container">
+            <div class="navbar__logo">LYFJSHS Library</div>
+            <button class="menu-toggle" id="menuToggle">
+                <span>☰</span>
+            </button>
+            <ul class="navbar__menu" id="navMenu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="books.html" class="active">Catalog</a></li>
+                <li><a href="#">My Library</a></li>
+                <li><a href="#">Contact</a></li>
+                <li id="authLink"><a href="login.html">Login</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <section class="welcome-section">
+            <h2>Book Catalog</h2>
+            <p>Browse our collection of books. Use the search and filter options to find your next read.</p>
+        </section>
+
+
+        <div class="catalog-controls">
+            <input type="text" id="searchInput" placeholder="Search books...">
+            <select id="filterBookType">
+                <option value="">Book Type</option>
+                <option value="Module">Module</option>
+                <option value="Novel">Novel</option>
+            </select>
+            <select id="filterStrand">
+                <option value="">Strand (Modules)</option>
+                <option value="STEM">STEM</option>
+                <option value="ABM">ABM</option>
+                <option value="HUMSS">HUMSS</option>
+                <option value="GAS">GAS</option>
+                <option value="tvl-cookery">TVL COOKERY</option>
+                <option value="tvl-ict-cp">TVL ICT CP</option>
+                <option value="tvl-ict-css">TVL ICT CSS</option>
+            </select>
+            <select id="filterGenre">
+                <option value="">Genre (Novels)</option>
+                <option value="Fantasy">Fantasy</option>
+                <option value="Science Fiction">Science Fiction</option>
+                <option value="Mystery">Mystery</option>
+                <option value="Thriller">Thriller</Thriller>
+                <option value="Romance">Romance</option>
+                <option value="Historical">Historical</option>
+                <option value="Young Adult">Young Adult</option>
+                <option value="Horror">Horror</option>
+            </select>
+            <select id="filterlevel">
+                <option value="">Grade Level</option>
+                <option value="11">Grade 11</option>
+                <option value="12">Grade 12</option>
+            </select>
+        </div>
+
+        <section class="features" id="bookList"></section>
+    </div>
+
+    <footer class="footer">
+        <div class="footer__container">
+            <div class="footer__info">
+                <h3>LYFJSHS Library</h3>
+                <p>Providing quality resources and services to our community.</p>
+            </div>
+            <div class="footer__links">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="#">Privacy Policy</a></li>
+                    <li><a href="#">Terms of Service</a></li>
+                    <li><a href="#">FAQ</a></li>
+                </ul>
+            </div>
+            <div class="footer__contact">
+                <h4>Contact Us</h4>
+                <p>Email: NA</p>
+                <p>Phone: NA</p>
+            </div>
+        </div>
+        <div class="footer__bottom">
+            <p>&copy; 2025  LYFJSHS Digital Library Management System. All rights reserved.</p>
+        </div>
+    </footer>
+    <script src="config.js"></script>
+    <script src="static/js/viewBook.js"></script>
+    <script src="static/js/books.js"></script>
+</body>
+</html>
