@@ -1,7 +1,8 @@
  const appConfig = {
-  apiEndpoint: "https://89547769d773.ngrok-free.app:2832",
+  apiEndpoint: "b3c0886f715d.ngrok-free.app :5002",
   timeout: 5000,
 };
+
 
 
 
