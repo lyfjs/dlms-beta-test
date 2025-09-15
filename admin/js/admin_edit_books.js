@@ -109,7 +109,6 @@ function closeEditModal() {
 }
 
 // Handle edit form submission
-// Handle edit form submission
 async function handleEditFormSubmission(e) {
     e.preventDefault();
     
@@ -119,7 +118,6 @@ async function handleEditFormSubmission(e) {
     
     try {
         const submitBtn = form.querySelector('.submit-btn');
-        const originalText = submitBtn.innerHTML;
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating...';
         submitBtn.disabled = true;
         
@@ -139,9 +137,6 @@ async function handleEditFormSubmission(e) {
             if (coverResponse.ok) {
                 const coverData = await coverResponse.json();
                 coverFilename = coverData.filename;
-            } else {
-                const coverError = await coverResponse.json();
-                throw new Error(coverError.error || 'Failed to upload cover');
             }
         }
         
@@ -161,28 +156,26 @@ async function handleEditFormSubmission(e) {
             if (fileResponse.ok) {
                 const fileData = await fileResponse.json();
                 filePathFilename = fileData.filename;
-            } else {
-                const fileError = await fileResponse.json();
-                throw new Error(fileError.error || 'Failed to upload file');
             }
         }
         
-        // Convert FormData to JSON for the API
-        const bookData = {
-            title: formData.get('title'),
-            description: formData.get('description') || '',
-            quantity: formData.get('quantity'),
-            publisher: formData.get('publisher') || '',
-            bookType: formData.get('bookType'),
-            level: formData.get('level') || '',
-            strand: formData.get('strand') || '',
-            qtr: formData.get('qtr') || '',
-            genre: formData.get('genre') || '',
-            author: formData.get('author') || '',
-            link: formData.get('link') || ''
-        };
+        // Convert FormData to JSON with all fields optional
+        const bookData = {};
         
-        // Add filenames if new ones were uploaded
+        // Only add fields that have values
+        formData.get('title') && (bookData.title = formData.get('title'));
+        formData.get('description') && (bookData.description = formData.get('description'));
+        formData.get('quantity') && (bookData.quantity = formData.get('quantity'));
+        formData.get('publisher') && (bookData.publisher = formData.get('publisher'));
+        formData.get('bookType') && (bookData.bookType = formData.get('bookType'));
+        formData.get('level') && (bookData.level = formData.get('level'));
+        formData.get('strand') && (bookData.strand = formData.get('strand'));
+        formData.get('qtr') && (bookData.qtr = formData.get('qtr'));
+        formData.get('genre') && (bookData.genre = formData.get('genre'));
+        formData.get('author') && (bookData.author = formData.get('author'));
+        formData.get('link') && (bookData.link = formData.get('link'));
+        
+        // Add filenames only if new ones were uploaded
         if (coverFilename) {
             bookData.cover = coverFilename;
         }
@@ -201,18 +194,17 @@ async function handleEditFormSubmission(e) {
         });
         
         if (!response.ok) {
-            const data = await response.json();
-            throw new Error(data.error || 'Failed to update book');
+            throw new Error('Failed to update book');
         }
         
-        // Reload the books list
+        // Reload the books list and close modal
         await loadBooks();
         closeEditModal();
-        
         showMessage('Book updated successfully', 'success');
+        
     } catch (error) {
         console.error('Error updating book:', error);
-        showMessage(error.message || 'Failed to update book. Please try again.', 'error');
+        showMessage('Failed to update book. Please try again.', 'error');
     } finally {
         const submitBtn = form.querySelector('.submit-btn');
         if (submitBtn) {

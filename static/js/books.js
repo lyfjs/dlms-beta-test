@@ -132,43 +132,60 @@ const BookUtils = {
         }
     }
 
-    function renderBooks(items) {
-        bookList.innerHTML = items.map(b => {
-            let bookInfo = '';
+function renderBooks(items) {
+    bookList.innerHTML = items.map(b => {
+        let bookInfo = '';
+        
+        if (b.bookType === 'Novel') {
+            bookInfo = b.genre ? `${b.bookType} - ${b.genre}` : b.bookType;
+        } else {
+            const academicInfo = [];
+            if (b.strand) academicInfo.push(b.strand);
+            if (b.level) academicInfo.push(`Grade ${b.level}`);
+            if (b.qtr) academicInfo.push(b.qtr.replace('qtr', 'Quarter '));
             
-            if (b.bookType === 'Novel') {
-                bookInfo = b.genre ? `${b.bookType} - ${b.genre}` : b.bookType;
-            } else {
-                const academicInfo = [];
-                if (b.strand) academicInfo.push(b.strand);
-                if (b.level) academicInfo.push(`Grade ${b.level}`);
-                if (b.qtr) academicInfo.push(b.qtr.replace('qtr', 'Quarter '));
-                
-                bookInfo = academicInfo.length > 0 ? 
-                    `${b.bookType} - ${academicInfo.join(' - ')}` : 
-                    b.bookType;
-            }
+            bookInfo = academicInfo.length > 0 ? 
+                `${b.bookType} - ${academicInfo.join(' - ')}` : 
+                b.bookType;
+        }
+
+        // Create additional info sections based on book type
+        const additionalInfo = b.bookType === 'Novel' ? 
+            `<p class="book-author">${b.author ? `Author: ${b.author}` : ''}</p>` :
+            '';
             
-            return `
-                <div class="feature-card book-card" 
-                     data-book-id="${b.id || ''}"
-                     data-level="${b.bookType === 'Novel' ? '' : (b.level ?? '')}" 
-                     data-genre="${b.bookType === 'Novel' ? (b.genre ?? '') : (b.strand ?? '')}" 
-                     data-booktype="${b.bookType ?? ''}"
-                     data-novel-genre="${b.bookType === 'Novel' ? (b.genre ?? '') : ''}"
-                     data-module-strand="${b.bookType !== 'Novel' ? (b.strand ?? '') : ''}"
-                     style="cursor: pointer;">
-                    <div class="book-card-content">
-                        ${BookUtils.resolveCoverUrl(b.cover) ? `<img class="book-image" src="${BookUtils.resolveCoverUrl(b.cover)}" alt="${b.title}">` : ''}
-                        <div class="book-text">
-                            <h3>${b.title}</h3>
-                            <p>${bookInfo}</p>
-                        </div>
+        const publisherInfo = b.publisher ? 
+            `<p class="book-publisher">Publisher: ${b.publisher}</p>` : 
+            '';
+            
+        // Updated description with 50 character limit
+        const description = b.description ? 
+            `<p class="book-description">${b.description.length > 50 ? b.description.substring(0, 50) + '...' : b.description}</p>` : 
+            '';
+        
+        return `
+            <div class="feature-card book-card" 
+                 data-book-id="${b.id || ''}"
+                 data-level="${b.bookType === 'Novel' ? '' : (b.level ?? '')}" 
+                 data-genre="${b.bookType === 'Novel' ? (b.genre ?? '') : (b.strand ?? '')}" 
+                 data-booktype="${b.bookType ?? ''}"
+                 data-novel-genre="${b.bookType === 'Novel' ? (b.genre ?? '') : ''}"
+                 data-module-strand="${b.bookType !== 'Novel' ? (b.strand ?? '') : ''}"
+                 style="cursor: pointer;">
+                <div class="book-card-content">
+                    ${BookUtils.resolveCoverUrl(b.cover) ? `<img class="book-image" src="${BookUtils.resolveCoverUrl(b.cover)}" alt="${b.title}">` : ''}
+                    <div class="book-text">
+                        <h3>${b.title}</h3>
+                        <p class="book-type-info">${bookInfo}</p>
+                        ${b.bookType === 'Novel' ? additionalInfo : ''}
+                        ${publisherInfo}
+                        ${description}
                     </div>
                 </div>
-            `;
-        }).join('');
-    }
+            </div>
+        `;
+    }).join('');
+}
 
     function setupBookCardClicks() {
         const bookCards = document.querySelectorAll('.book-card');
