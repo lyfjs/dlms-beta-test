@@ -1,24 +1,21 @@
 function resetViewState() {
     const detailsContainer = document.getElementById('bookDetailsContainer');
-    const commentsSection = document.getElementById('commentsSection');
     const viewCommentsBtn = document.getElementById('viewCommentsBtn');
     const addCommentBtn = document.getElementById('addCommentBtn');
-    const addCommentForm = document.getElementById('addCommentForm');
     
     // Reset to book details view
     detailsContainer.style.display = 'block';
-    commentsSection.style.display = 'none';
     viewCommentsBtn.innerHTML = '<i class="fas fa-comments"></i> View Comments';
     
     // Reset comment form
-    if (addCommentBtn) addCommentBtn.style.display = 'none';
-    if (addCommentForm) addCommentForm.style.display = 'none';
+    if (addCommentBtn) addCommentBtn.style.display = 'inline-block';
 }
 // Book Popup Module - Handles the popup display with dynamic API data
 (function() {
 
-    
     let currentBookData = null;
+    let currentBookId = null;  // Add this line
+
 
     // Create popup HTML structure
     function createPopupHTML() {
@@ -94,43 +91,70 @@ function resetViewState() {
                                 </div>
                             </div>
                         </div>
-                        <!-- Comments section - now toggleable -->
-                        <div class="comments-section" id="commentsSection" style="display: none;">
-                            <div class="comments-header">
-                                <h3><i class="fas fa-comments"></i> Comments</h3>
-                            </div>
-                            <div class="add-comment-form" id="addCommentForm" style="display: none;">
-                                <div class="comment-input-group">
-                                    <textarea id="commentTextarea" placeholder="Share your thoughts about this book..." 
-                                              class="comment-textarea" rows="3" maxlength="500"></textarea>
-                                    <div class="comment-actions">
-                                        <button type="button" id="submitCommentBtn" class="btn btn-primary">
-                                            <i class="fas fa-paper-plane"></i> Post Comment
-                                        </button>
-                                        <button type="button" id="cancelCommentBtn" class="btn btn-secondary">
-                                            Cancel
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="comments-list" id="commentsList">
-                                <div class="loading-comments">
-                                    <i class="fas fa-spinner fa-spin"></i> Loading comments...
-                                </div>
-                            </div>
-                        </div>
                     </div>
                     <div class="popup-footer">
+                        <button class="btn btn-outline" id="readOnlineBtn" style="display: none;">
+                            <i class="fas fa-book-reader"></i> Read Online
+                        </button>
+
+                        
                         <button class="btn btn-outline" id="viewCommentsBtn">
                             <i class="fas fa-comments"></i> View Comments
                         </button>
-                        <button class="btn btn-outline" id="addCommentBtn" style="display: none;">
+                        <button class="btn btn-outline" id="addCommentBtn">
                             <i class="fas fa-comment"></i> Add Comment
                         </button>
                         <button class="btn btn-primary" id="popupBorrowBtn" style="display: none;">
                             Request Borrow
                         </button>
                         <button class="btn btn-secondary" id="popupCloseBtn">Close</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Add Comment Popup -->
+            <div id="addCommentPopup" class="book-popup" style="display: none;">
+                <div class="popup-overlay"></div>
+                <div class="popup-content">
+                    <div class="popup-header">
+                        <h2>Add Comment</h2>
+                        <button class="popup-close" id="addCommentPopupClose">&times;</button>
+                    </div>
+                    <div class="popup-body">
+                        <div class="add-comment-form" id="addCommentForm">
+                            <div class="comment-input-group">
+                                <textarea id="commentTextarea" placeholder="Share your thoughts about this book..." 
+                                          class="comment-textarea" rows="3" maxlength="500"></textarea>
+                                <div class="comment-actions">
+                                    <button type="button" id="submitCommentBtn" class="btn btn-primary">
+                                        <i class="fas fa-paper-plane"></i> Post Comment
+                                    </button>
+                                    <button type="button" id="cancelCommentBtn" class="btn btn-secondary">
+                                        Cancel
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- View Comments Popup -->
+            <div id="viewCommentsPopup" class="book-popup" style="display: none;">
+                <div class="popup-overlay"></div>
+                <div class="popup-content">
+                    <div class="popup-header">
+                        <h2>Comments</h2>
+                        <button class="popup-close" id="viewCommentsPopupClose">&times;</button>
+                    </div>
+                    <div class="popup-body">
+                        <div class="comments-section">
+                            <div class="comments-list" id="commentsList">
+                                <div class="loading-comments">
+                                    <i class="fas fa-spinner fa-spin"></i> Loading comments...
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -142,19 +166,29 @@ function resetViewState() {
         }
     }
 
+
+
+
+    
     // Show popup with book data
     function showBookPopup(bookData, isLoading = false) {
+        //console.log('Book data received:', bookData);
         currentBookData = bookData;
+        currentBookId = bookData?.id;  // Add this line
+
+        console.log('Current book ID:', currentBookId); 
+
+
+
+
         
         const popup = document.getElementById('bookPopup');
         const loadingDiv = document.getElementById('popupLoading');
         const detailsContainer = document.getElementById('bookDetailsContainer');
-        const commentsSection = document.getElementById('commentsSection');
         
         if (isLoading) {
             loadingDiv.style.display = 'block';
             detailsContainer.style.display = 'none';
-            commentsSection.style.display = 'none';
             popup.style.display = 'block';
             document.body.style.overflow = 'hidden';
             return;
@@ -163,8 +197,6 @@ function resetViewState() {
         // Hide loading and show book details by default
         loadingDiv.style.display = 'none';
         detailsContainer.style.display = 'block';
-        commentsSection.style.display = 'none';
-        
         
         // Populate popup with book data
         document.getElementById('popupTitle').textContent = bookData.title || 'Book Details';
@@ -187,7 +219,18 @@ function resetViewState() {
         }
 
         
-
+        
+        // Inside the showBookPopup function, replace the existing readOnlineBtn code with:
+        const readOnlineBtn = document.getElementById('readOnlineBtn');
+        if (bookData.pdfLink || bookData.link || bookData.file_path) {
+            readOnlineBtn.style.display = 'inline-block';
+            readOnlineBtn.addEventListener('click', () => {
+                const pdfUrl = bookData.pdfLink || bookData.link || bookData.file_path;
+                window.location.href = `viewer.html?pdf=${encodeURIComponent(pdfUrl)}`;
+            });
+        } else {
+            readOnlineBtn.style.display = 'none';
+        }
 
         // Populate all fields
         populateField('popupQuantity', bookData.quantity || bookData.stock || '0');
@@ -314,39 +357,43 @@ function resetViewState() {
         const borrowBtn = document.getElementById('popupBorrowBtn');
         const addCommentBtn = document.getElementById('addCommentBtn');
         const viewCommentsBtn = document.getElementById('viewCommentsBtn');
-        const addCommentForm = document.getElementById('addCommentForm');
         const submitCommentBtn = document.getElementById('submitCommentBtn');
         const cancelCommentBtn = document.getElementById('cancelCommentBtn');
         const commentTextarea = document.getElementById('commentTextarea');
-    
-        // Remove existing event listeners by cloning elements
-        const newBorrowBtn = borrowBtn.cloneNode(true);
-        const newAddCommentBtn = addCommentBtn.cloneNode(true);
-        const newViewCommentsBtn = viewCommentsBtn.cloneNode(true);
-        const newSubmitCommentBtn = submitCommentBtn.cloneNode(true);
-        const newCancelCommentBtn = cancelCommentBtn.cloneNode(true);
+        const addCommentPopup = document.getElementById('addCommentPopup');
+        const viewCommentsPopup = document.getElementById('viewCommentsPopup');
         
-        borrowBtn.parentNode.replaceChild(newBorrowBtn, borrowBtn);
-        addCommentBtn.parentNode.replaceChild(newAddCommentBtn, addCommentBtn);
-        viewCommentsBtn.parentNode.replaceChild(newViewCommentsBtn, viewCommentsBtn);
-        submitCommentBtn.parentNode.replaceChild(newSubmitCommentBtn, submitCommentBtn);
-        cancelCommentBtn.parentNode.replaceChild(newCancelCommentBtn, cancelCommentBtn);
+        // Close buttons for all popups
+        document.querySelectorAll('.popup-close, #popupCloseBtn').forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const popup = button.closest('.book-popup');
+                if (popup) {
+                    popup.style.display = 'none';
+                    if (popup.id === 'bookPopup') {
+                        document.body.style.overflow = 'auto';
+                    }
+                }
+            });
+        });
     
         // Add new event listeners
-        newBorrowBtn.addEventListener('click', (e) => {
+        borrowBtn.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
             handleBorrowRequest(bookData);
         });
     
-        // View/Hide Comments toggle
-        newViewCommentsBtn.addEventListener('click', (e) => {
+        // View Comments button
+        viewCommentsBtn.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
-            toggleCommentsView();
+            viewCommentsPopup.style.display = 'block';
         });
     
-        newAddCommentBtn.addEventListener('click', (e) => {
+        // Add Comment button
+        addCommentBtn.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
             const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
@@ -355,23 +402,23 @@ function resetViewState() {
                 return;
             }
             
-            addCommentForm.style.display = 'block';
+            addCommentPopup.style.display = 'block';
             commentTextarea.focus();
-            newAddCommentBtn.style.display = 'none';
         });
     
-        newCancelCommentBtn.addEventListener('click', (e) => {
+        // Cancel comment button
+        cancelCommentBtn.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
-            addCommentForm.style.display = 'none';
-            newAddCommentBtn.style.display = 'inline-block';
+            addCommentPopup.style.display = 'none';
             commentTextarea.value = '';
         });
     
-        newSubmitCommentBtn.addEventListener('click', (e) => {
+        // Submit comment button
+        submitCommentBtn.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
-            submitComment(bookData.id);
+            submitComment();  // Remove the bookId parameter here
         });
     
         // Handle Enter key in textarea (Ctrl+Enter to submit)
@@ -380,6 +427,21 @@ function resetViewState() {
                 e.preventDefault();
                 submitComment(bookData.id);
             }
+        });
+
+        // Close popups when clicking overlay
+        document.querySelectorAll('.popup-overlay').forEach(overlay => {
+            overlay.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const popup = overlay.closest('.book-popup');
+                if (popup) {
+                    popup.style.display = 'none';
+                    if (popup.id === 'bookPopup') {
+                        document.body.style.overflow = 'auto';
+                    }
+                }
+            });
         });
     }
 
@@ -409,63 +471,66 @@ function resetViewState() {
     }
 
     // Handle borrow request
-    async function handleBorrowRequest(bookData) {
+// Update the handleBorrowRequest function
+async function handleBorrowRequest(bookData) {
+    try {
+        // Validate book data first
         if (!bookData || !bookData.id) {
-            alert('Error: Book data not available');
-            return;
+            throw new Error('Book data not available');
         }
 
-        try {
-            const user = JSON.parse(localStorage.getItem('user') || '{}');
-            if (!user.id) {
-                alert('Error: User not properly logged in');
-                return;
-            }
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        if (!user.id) {
+            throw new Error('User not properly logged in');
+        }
 
-            const API_BASE_URL = appConfig.apiEndpoint + '/api';
-            
-            // Show loading state
-            const borrowBtn = document.getElementById('popupBorrowBtn');
-            const originalText = borrowBtn.innerHTML;
-            borrowBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
-            borrowBtn.disabled = true;
+        const API_BASE_URL = appConfig.apiEndpoint + '/api';
+        
+        // Show loading state
+        const borrowBtn = document.getElementById('popupBorrowBtn');
+        const originalText = borrowBtn.innerHTML;
+        borrowBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+        borrowBtn.disabled = true;
 
-            const response = await fetch(`${API_BASE_URL}/borrow`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                credentials: 'include',
-                body: JSON.stringify({
-                    bookId: bookData.id,
-                    userId: user.id
-                })
-            });
-            
-            if (response.ok) {
-                const result = await response.json();
-                alert('Borrow request submitted successfully!');
-                hideBookPopup();
-                // Optionally refresh the book list to update quantities
-                if (window.location.pathname.includes('books.html')) {
-                    window.location.reload();
-                }
-            } else {
-                const error = await response.json();
-                alert(`Error: ${error.message || error.error || 'Failed to submit borrow request'}`);
-            }
-        } catch (error) {
-            console.error('Error submitting borrow request:', error);
-            alert('Error submitting borrow request. Please try again.');
-        } finally {
-            // Reset button state
-            const borrowBtn = document.getElementById('popupBorrowBtn');
-            if (borrowBtn) {
-                borrowBtn.innerHTML = 'Request Borrow';
-                borrowBtn.disabled = false;
-            }
+        const response = await fetch(`${API_BASE_URL}/borrow`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include',
+            body: JSON.stringify({
+                bookId: bookData.id,
+                userId: user.id
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (!response.ok) {
+            throw new Error(result.message || result.error || 'Failed to submit borrow request');
+        }
+
+        // Only show success if everything worked
+        alert('Borrow request submitted successfully!');
+        hideBookPopup();
+        
+        // Refresh book list if on books page
+        if (window.location.pathname.includes('books.html')) {
+            window.location.reload();
+        }
+
+    } catch (error) {
+        console.error('Error submitting borrow request:', error);
+        alert(`Error: ${error.message}`);
+    } finally {
+        // Reset button state
+        const borrowBtn = document.getElementById('popupBorrowBtn');
+        if (borrowBtn) {
+            borrowBtn.innerHTML = 'Request Borrow';
+            borrowBtn.disabled = false;
         }
     }
+}
 
     // Load comments for a book
     async function loadBookComments(bookId) {
@@ -532,9 +597,16 @@ function resetViewState() {
     }
 
     // Submit a new comment
-    async function submitComment(bookId) {
+async function submitComment(bookId) {
+        if (!currentBookId) {
+            console.error('No book ID available');
+            alert('Error: Could not submit comment - missing book ID');
+            return;
+        }
+
         const commentTextarea = document.getElementById('commentTextarea');
         const submitBtn = document.getElementById('submitCommentBtn');
+        const addCommentPopup = document.getElementById('addCommentPopup');
         const commentText = commentTextarea.value.trim();
         
         if (!commentText) {
@@ -553,7 +625,7 @@ function resetViewState() {
         
         try {
             const API_BASE_URL = appConfig.apiEndpoint + '/api';
-            const response = await fetch(`${API_BASE_URL}/books/${bookId}/comments`, {
+            const response = await fetch(`${API_BASE_URL}/books/${currentBookId}/comments`, {  // Use currentBookId here
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -569,13 +641,12 @@ function resetViewState() {
                 throw new Error(data.error || 'Failed to post comment');
             }
             
-            // Clear form and hide it
+            // Clear form and hide popup
             commentTextarea.value = '';
-            document.getElementById('addCommentForm').style.display = 'none';
-            document.getElementById('addCommentBtn').style.display = 'inline-block';
+            addCommentPopup.style.display = 'none';
             
-            // Reload comments
-            await loadBookComments(bookId);
+            // Reload comments using currentBookId
+            await loadBookComments(currentBookId);
             
             // Show success message
             showCommentMessage('Comment posted successfully!', 'success');
@@ -620,7 +691,7 @@ function resetViewState() {
             messageElement.style.cssText = `
                 position: fixed;
                 top: 80px;
-                right: 20px;
+                right: 0px;
                 padding: 12px 16px;
                 border-radius: 6px;
                 color: white;
@@ -665,6 +736,7 @@ function resetViewState() {
             document.body.style.overflow = 'auto';
         }
         currentBookData = null;
+        currentBookId = null;  // Add this line
     }
 
     // Setup event listeners

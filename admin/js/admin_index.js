@@ -363,37 +363,46 @@ function setupCoverPreview() {
     }
 }
 
-// Handle Add Book form submission
 async function handleAddBookSubmit(e) {
     e.preventDefault();
-    
-    const form = e.target;
-    const bookType = form.querySelector('#bookType').value;
-    let isValid = true;
-    
-    if (bookType === 'Novel') {
-        const genre = form.querySelector('#genre').value;
-        if (!genre) {
-            showMessage('Please select a genre for the novel.', 'error');
-            isValid = false;
-        }
-    } else {
-        const level = form.querySelector('#level').value;
-        const strand = form.querySelector('#strand').value;
-        const qtr = form.querySelector('#qtr').value;
-        
-        if (!level || !strand || !qtr) {
-            showMessage('Please fill in all required academic fields (Grade Level, Strand, and Quarter).', 'error');
-            isValid = false;
-        }
-    }
-    
-    if (isValid) {
-        await submitBook();
-    }
+    await submitBook();
 }
 
-// Submit book to API
+// Update the toggleFields function to remove required attributes
+function toggleFields(select) {
+    const form = select.closest('form');
+    if (!form) return;
+    
+    const showNovel = select.value === 'Novel';
+    const genreGroup = form.querySelector('#genreGroup');
+    const levelGroup = form.querySelector('#levelGroup');
+    const qtrGroup = form.querySelector('#qtrGroup');
+    const strandGroup = form.querySelector('#strandGroup');
+    const authorSelect = form.querySelector('.author-group');
+    
+    if (showNovel) {
+        if (genreGroup) genreGroup.style.display = 'block';
+        if (levelGroup) levelGroup.style.display = 'none';
+        if (qtrGroup) qtrGroup.style.display = 'none';
+        if (strandGroup) strandGroup.style.display = 'none';
+        if (authorSelect) authorSelect.style.display = 'block';
+    } else {
+        if (genreGroup) genreGroup.style.display = 'none';
+        if (levelGroup) levelGroup.style.display = 'block';
+        if (qtrGroup) qtrGroup.style.display = 'block';
+        if (strandGroup) strandGroup.style.display = 'block';
+        if (authorSelect) authorSelect.style.display = 'none';
+    }
+}
+function validatePdfUrl(input) {
+    const url = input.value.toLowerCase();
+    if (url && !url.endsWith('.pdf') && !url.endsWith('.html')) {
+        input.setCustomValidity('URL must point to a PDF or HTML file (ending with .pdf or .html)');
+    } else {
+        input.setCustomValidity('');
+    }
+}
+// Update the submitBook function to make all fields optional
 async function submitBook() {
     const submitBtn = document.getElementById('submitBtn');
     const originalText = submitBtn.innerHTML;
@@ -402,8 +411,25 @@ async function submitBook() {
     submitBtn.disabled = true;
     
     try {
-        // Upload cover first
+        // Update PDF/HTML URL validation
+        const linkInput = document.getElementById('link');
+        if (linkInput.value && 
+            !linkInput.value.toLowerCase().endsWith('.pdf') && 
+            !linkInput.value.toLowerCase().endsWith('.html')) {
+            throw new Error('Raw link must point to a PDF or HTML file');
+        }
+        
+    } catch (error) {
+        console.error('Error submitting book:', error);
+        showMessage(error.message || 'Network error. Please check your connection.', 'error');
+    }
+
+
+    try {
+        // Handle file uploads if present
         let coverFilename = null;
+        let filePathFilename = null;
+        
         const coverFile = document.getElementById('cover').files[0];
         if (coverFile) {
             const coverFormData = new FormData();
@@ -415,17 +441,12 @@ async function submitBook() {
                 credentials: 'include'
             });
             
-            if (!coverResponse.ok) {
-                const coverError = await coverResponse.json();
-                throw new Error(coverError.error || 'Failed to upload cover');
+            if (coverResponse.ok) {
+                const coverData = await coverResponse.json();
+                coverFilename = coverData.filename;
             }
-            
-            const coverData = await coverResponse.json();
-            coverFilename = coverData.filename;
         }
         
-        // Upload file next
-        let filePathFilename = null;
         const bookFile = document.getElementById('file_path').files[0];
         if (bookFile) {
             const fileFormData = new FormData();
@@ -437,43 +458,36 @@ async function submitBook() {
                 credentials: 'include'
             });
             
-            if (!fileResponse.ok) {
-                const fileError = await fileResponse.json();
-                throw new Error(fileError.error || 'Failed to upload file');
+            if (fileResponse.ok) {
+                const fileData = await fileResponse.json();
+                filePathFilename = fileData.filename;
             }
-            
-            const fileData = await fileResponse.json();
-            filePathFilename = fileData.filename;
         }
         
-        // Now submit the book with the filenames
+        // Create FormData with optional fields
         const formData = new FormData();
+        const fields = {
+            'title': document.getElementById('title').value || '',
+            'description': document.getElementById('description').value || '',
+            'quantity': document.getElementById('quantity').value || '0',
+            'publisher': document.getElementById('publisher').value || '',
+            'bookType': document.getElementById('bookType').value || '',
+            'link': document.getElementById('link').value || '',
+            'genre': document.getElementById('genre')?.value || '',
+            'author': document.getElementById('author')?.value || '',
+            'level': document.getElementById('level')?.value || '',
+            'strand': document.getElementById('strand')?.value || '',
+            'qtr': document.getElementById('qtr')?.value || ''
+        };
         
-        formData.append('title', document.getElementById('title').value);
-        formData.append('description', document.getElementById('description').value);
-        formData.append('quantity', document.getElementById('quantity').value);
-        formData.append('publisher', document.getElementById('publisher').value);
-        formData.append('bookType', document.getElementById('bookType').value);
-        formData.append('link', document.getElementById('link').value || '');
+        // Append non-empty values to FormData
+        Object.entries(fields).forEach(([key, value]) => {
+            formData.append(key, value);
+        });
         
-        // Add filenames from uploads
-        if (coverFilename) {
-            formData.append('cover_filename', coverFilename);
-        }
-        
-        if (filePathFilename) {
-            formData.append('file_path_filename', filePathFilename);
-        }
-        
-        const bookType = document.getElementById('bookType').value;
-        if (bookType === 'Novel') {
-            formData.append('genre', document.getElementById('genre').value);
-            formData.append('author', document.getElementById('author').value);
-        } else {
-            formData.append('level', document.getElementById('level').value);
-            formData.append('strand', document.getElementById('strand').value);
-            formData.append('qtr', document.getElementById('qtr').value);
-        }
+        // Add filenames if files were uploaded
+        if (coverFilename) formData.append('cover_filename', coverFilename);
+        if (filePathFilename) formData.append('file_path_filename', filePathFilename);
         
         const response = await fetch(`${API_SERVER}/api/admin/books`, {
             method: 'POST',
@@ -485,14 +499,12 @@ async function submitBook() {
         
         if (response.ok) {
             showMessage(data.message || 'Book added successfully!', 'success');
-            // Reset form
             document.getElementById('addBookForm').reset();
             const coverPreview = document.getElementById('coverPreview');
             if (coverPreview) {
                 coverPreview.src = '';
                 coverPreview.alt = 'No image selected';
             }
-            // Reset field visibility
             toggleFields(document.getElementById('bookType'));
         } else {
             showMessage(data.error || 'Failed to add book. Please try again.', 'error');

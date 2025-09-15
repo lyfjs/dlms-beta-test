@@ -357,3 +357,26 @@
         flex-direction: column;
     }
 }
+
+
+.book-text {
+    padding: 10px;
+}
+
+.book-type-info {
+    color: #666;
+    margin-bottom: 8px;
+}
+
+.book-author, .book-publisher {
+    font-size: 0.9em;
+    color: #555;
+    margin: 4px 0;
+}
+
+.book-description {
+    font-size: 0.85em;
+    color: #777;
+    margin-top: 8px;
+    line-height: 1.4;
+}
